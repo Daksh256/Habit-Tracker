@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.habittrackerfinal.Database.Habits
+import kotlinx.coroutines.launch
 
 data class HabitCategory(
     val name: String,
@@ -169,10 +170,16 @@ fun HabitListScreen(
             items(habits) { habit ->
                 HabitItem(
                     habit = habit,
-                    onDelete = { viewModel.deleteHabit(habit.id) }
+                    onDelete = { viewModel.deleteHabit(habit.id) },
+                    onComplete = { viewModel.completeHabit(habit.id) },
+                    viewModel = viewModel
                 )
+
+                // Call StreakTracker here
+                StreakTracker(viewModel = viewModel, habitId = habit.id)
             }
         }
+
     }
 }
 
@@ -180,45 +187,44 @@ fun HabitListScreen(
 @Composable
 fun HabitItem(
     habit: Habits,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onComplete: () -> Unit,
+    viewModel: HabitViewModel
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "${habit.selectedIcon} ${habit.name}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                habit.description?.let { description ->
-                    if (description.isNotBlank()) {
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Habit details
+            Text(
+                text = "${habit.selectedIcon} ${habit.name}",
+                style = MaterialTheme.typography.titleMedium
+            )
+            habit.description?.let { description ->
+                if (description.isNotBlank()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
-                Text(
-                    text = "Category: ${habit.selectedCategory}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Daily Goal: ${habit.completionsPerDay}",
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
-            Box(
-                modifier = Modifier.background(Color(habit.selectedColor))
-            ) {
+            Text(
+                text = "Category: ${habit.selectedCategory}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Daily Goal: ${habit.completionsPerDay}",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            // Buttons for completion and deletion
+            Row(modifier = Modifier.padding(top = 8.dp)) {
+                Button(onClick = onComplete) {
+                    Text("Complete")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -226,6 +232,13 @@ fun HabitItem(
                     )
                 }
             }
+
+            // Habit Overview (weekly or monthly)
+            HabitOverview(
+                habitId = habit.id,
+                viewModel = viewModel,
+                overviewType = "week" // or "month" as needed
+            )
         }
     }
 }
@@ -270,4 +283,59 @@ fun ColorBox(color: Color, isSelected: Boolean, onClick: () -> Unit) {
             .border(2.dp, if (isSelected) Color.Black else Color.Transparent)
             .clickable { onClick() }
     )
+}
+
+@Composable
+fun HabitOverview(
+    habitId: Int,
+    viewModel: HabitViewModel,
+    overviewType: String // "week" or "month"
+) {
+    var completions by remember { mutableStateOf(0) }
+
+    // Fetch the data when the Composable is launched
+    LaunchedEffect(habitId, overviewType) {
+        if (overviewType == "week") {
+            viewModel.getWeeklyCompletions(habitId) { count ->
+                completions = count
+            }
+        } else {
+            viewModel.getMonthlyCompletions(habitId) { count ->
+                completions = count
+            }
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = if (overviewType == "week") "Weekly Completions: $completions"
+            else "Monthly Completions: $completions",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+fun StreakTracker(viewModel: HabitViewModel, habitId: Int) {
+    val scope = rememberCoroutineScope()
+    var streak by remember { mutableStateOf<List<Pair<String, Boolean>>>(emptyList()) }
+
+    LaunchedEffect(habitId) {
+        scope.launch {
+            streak = viewModel.getHabitStreakForWeek(habitId)
+        }
+    }
+
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        streak.forEach { (day, completed) ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = day)
+                Text(if (completed) "✅" else "❌")
+            }
+        }
+    }
 }
