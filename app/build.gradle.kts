@@ -43,8 +43,9 @@ android {
 dependencies {
 
     implementation ("androidx.compose.runtime:runtime-livedata:1.7.8")
+    implementation(libs.androidx.navigation.compose)
     val room_version = "2.6.1"
-
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.room:room-runtime:$room_version")
 
     // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)

@@ -2,20 +2,23 @@ package com.example.habittrackerfinal
 
 import android.app.Application
 import androidx.room.Room
-import com.example.habittrackerfinal.Database.HabitsDatabase
+import com.example.habittrackerfinal.data.local.HabitDatabase
 
-class MainApplication : Application(){
-    companion object{
-        lateinit var habitsDatabase: HabitsDatabase
+class MainApplication : Application() {
+
+    companion object {
+        // Expose the database as a read-only property.
+        lateinit var habitDatabase: HabitDatabase
+            private set
     }
 
     override fun onCreate() {
         super.onCreate()
-        habitsDatabase = Room.databaseBuilder(
+        // Initialize the Room database.
+        habitDatabase = Room.databaseBuilder(
             applicationContext,
-            HabitsDatabase::class.java,
-            HabitsDatabase.DATABASE_NAME
+            HabitDatabase::class.java,
+            HabitDatabase.DATABASE_NAME
         ).build()
-
     }
 }
