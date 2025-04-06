@@ -18,9 +18,7 @@ import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
 
 @Composable
 fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit) {
-    //val habits by viewModel.habitsList.observeAsState(emptyList())
-    val habits by viewModel.habitsList.collectAsState()
-
+    val habits by viewModel.habitsList.observeAsState(emptyList()) // ✅ Using LiveData
 
     Column {
         Button(onClick = onNavigateToAddHabit) {
@@ -34,8 +32,10 @@ fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit)
                     onComplete = { viewModel.completeHabit(habit.id) },
                     viewModel = viewModel
                 )
-                StreakTracker(viewModel = viewModel, habitId = habit.id,habitColor = Color(habit.color))
+                StreakTracker(viewModel = viewModel, habitId = habit.id, habitColor = Color(habit.color or 0xFF000000.toInt()))
+
             }
         }
     }
 }
+

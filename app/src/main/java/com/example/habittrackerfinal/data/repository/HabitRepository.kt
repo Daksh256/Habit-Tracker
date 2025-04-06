@@ -1,6 +1,7 @@
 package com.example.habittrackerfinal.data.repository
 
 
+import androidx.lifecycle.LiveData
 import com.example.habittrackerfinal.data.local.HabitDao
 import com.example.habittrackerfinal.data.local.HabitEntity
 import com.example.habittrackerfinal.data.local.HabitRecordEntity
@@ -9,7 +10,12 @@ import com.example.habittrackerfinal.domain.mapper.toHabitEntity
 
 class HabitRepository(private val habitDao: HabitDao) {
 
-    fun getAllHabits() = habitDao.getAll()
+    //fun getAllHabits() = habitDao.getAll()
+    fun getAllHabits(): LiveData<List<HabitEntity>> = habitDao.getAllHabits()
+
+    fun getHabitRecordsForWeekLiveData(habitId: Int, startDate: String): LiveData<List<HabitRecordEntity>> {
+        return habitDao.getHabitRecordsForWeekLiveData(habitId, startDate)
+    }
 
     suspend fun addHabit(habit: Habit) {
         val entity = habit.toHabitEntity() // Convert to DB entity

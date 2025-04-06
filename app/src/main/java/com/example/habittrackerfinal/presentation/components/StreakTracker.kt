@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun StreakTracker(
@@ -32,37 +34,31 @@ fun StreakTracker(
 ) {
     val scope = rememberCoroutineScope()
     var streak by remember { mutableStateOf<List<Pair<String, Boolean>>>(emptyList()) }
+    val streakData by viewModel.getWeeklyStreakLiveData(habitId).observeAsState(emptyList())
 
     LaunchedEffect(habitId) {
-        scope.launch {
+        scope.launch(Dispatchers.IO) {
             streak = viewModel.getHabitStreakForWeek(habitId)
         }
     }
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp) // Added some padding
     ) {
-        streak.forEach { (day, completed) ->
+        // Use the observed streakData directly
+        streakData.forEach { (day, completed) ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = day)
-                if (completed) {
-                    // Show a colored box with the habit's chosen color when completed
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(habitColor)
-                    )
-                } else {
-                    // Show a light gray outline or box when not completed
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(Color.LightGray)
-                    )
-                }
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        // Use habitColor if completed, otherwise LightGray
+                        .background(if (completed) habitColor else Color.LightGray)
+                )
             }
         }
     }
+
 }
 

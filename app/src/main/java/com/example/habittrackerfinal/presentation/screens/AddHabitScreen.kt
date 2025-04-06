@@ -38,7 +38,7 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
 
     // For this example, we use defaults for emoji and color.
     val defaultEmoji = "⭐"
-    val defaultColor = Color.Blue
+    //val defaultColor = Color.Blue
 
     // Show error message if validation fails.
     val showError = remember { mutableStateOf(false) }
@@ -103,7 +103,7 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
                     completionsPerDay = habitCompletionsPerDay.value.toIntOrNull() ?: 1,
                     category = habitCategory.value,
                     icon = defaultEmoji,
-                    color = defaultColor.toArgb(),
+                    color = selectedColor.toArgb(),
                     createdDate = System.currentTimeMillis() // Using timestamp for createdDate
                 )
                 viewModel.addHabit(habit)
