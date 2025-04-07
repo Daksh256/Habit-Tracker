@@ -41,6 +41,7 @@ import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
 fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit) {
     val habits by viewModel.habitsList.observeAsState(emptyList())
 
+    //Test
     // State for managing the delete confirmation dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
