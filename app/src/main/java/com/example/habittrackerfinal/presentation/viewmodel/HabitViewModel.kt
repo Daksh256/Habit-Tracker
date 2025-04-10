@@ -36,15 +36,25 @@ class HabitViewModel(
         }
     }
 
-    fun completeHabit(habitId: Int) {
+    fun handleDayClick(habitId: Int, date: LocalDate) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.addHabitRecord(
-                HabitRecordEntity(
-                    habitId = habitId,
-                    completionDate = LocalDate.now().toString(),
-                    completionTimestamp = System.currentTimeMillis()
+            val habit = repository.getHabitById(habitId) ?: return@launch // Exit if habit not found
+            val dateString = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val currentCount = repository.getCompletionCountForDate(habitId, dateString)
+
+            if (currentCount < habit.completionsPerDay) {
+                // Increment: Add a new record
+                repository.addHabitRecord(
+                    HabitRecordEntity(
+                        habitId = habitId,
+                        completionDate = dateString,
+                        completionTimestamp = System.currentTimeMillis() // Timestamp might be less relevant now
+                    )
                 )
-            )
+            } else {
+                // Reset: Delete all records for this day
+                repository.deleteRecordsForDate(habitId, dateString)
+            }
         }
     }
 
@@ -58,24 +68,53 @@ class HabitViewModel(
         }.reversed()
     }
 
-    fun getWeeklyStreakLiveData(habitId: Int): LiveData<List<Pair<String, Boolean>>> {
-        val today = LocalDate.now()
-        val sevenDaysAgo = today.minusDays(6) // Start date for the last 7 days
-        val startDateString = sevenDaysAgo.format(DateTimeFormatter.ISO_LOCAL_DATE) // Format needed for query
+    fun completeAllForToday(habitId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val habit = repository.getHabitById(habitId) ?: return@launch
+            val todayString = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val currentCount = repository.getCompletionCountForDate(habitId, todayString)
+            val needed = habit.completionsPerDay - currentCount
 
-        // Get the LiveData of records from the repository
+            if (needed > 0) {
+                val baseRecord = HabitRecordEntity(
+                    habitId = habitId,
+                    completionDate = todayString,
+                    completionTimestamp = System.currentTimeMillis()
+                    // id will be auto-generated
+                )
+                // Add the required number of records
+                for (i in 1..needed) {
+                    // Create a new instance or ensure ID is 0 for auto-generation if needed
+                    repository.addHabitRecord(baseRecord.copy(id = 0))
+                }
+            }
+            // Optional: If already complete, maybe reset? Or do nothing.
+            // else { repository.deleteRecordsForDate(habitId, todayString) }
+        }
+    }
+
+    fun getWeeklyCompletionCounts(habitId: Int): LiveData<List<Pair<LocalDate, Int>>> {
+        val today = LocalDate.now()
+        val sevenDaysAgo = today.minusDays(6)
+        val startDateString = sevenDaysAgo.format(DateTimeFormatter.ISO_LOCAL_DATE)
+
         val recordsLiveData = repository.getHabitRecordsForWeekLiveData(habitId, startDateString)
 
-        // Transform the LiveData<List<HabitRecordEntity>> to LiveData<List<Pair<String, Boolean>>>
         return recordsLiveData.map { records ->
-            val recordsMap = records.associateBy { LocalDate.parse(it.completionDate) } // Map date string to record for quick lookup
+            // Group records by date and count them
+            val countsByDate = records
+                .mapNotNull { LocalDate.parse(it.completionDate) } // Parse date string
+                .filter { !it.isBefore(sevenDaysAgo) && !it.isAfter(today)} // Ensure within range
+                .groupingBy { it }
+                .eachCount()
+
+            // Create list for the last 7 days, filling in counts
             (0..6).map { offset ->
                 val date = today.minusDays(offset.toLong())
-                val dayName = date.dayOfWeek.name.take(3) // "MON", "TUE", etc.
-                // Check if a record exists for this specific date in the fetched records
-                val completed = recordsMap.containsKey(date)
-                dayName to completed
-            }.reversed() // Reverse to show Mon -> Sun or equivalent order
+                //val dayName = date.dayOfWeek.name.take(3) // We need the full date for clicking
+                val count = countsByDate[date] ?: 0 // Get count for the date, default to 0
+                date to count // Return Pair(LocalDate, Count)
+            }.reversed() // Reverse to show Mon -> Sun order
         }
     }
 }

@@ -6,15 +6,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.habittrackerfinal.data.model.Habit
 import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
@@ -23,6 +32,95 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.example.habittrackerfinal.presentation.components.ColorBox
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
+
+    val habitName = remember { mutableStateOf("") }
+    val habitDescription = remember { mutableStateOf("") }
+    val habitCategory = remember { mutableStateOf("") }
+    val habitCompletionsPerDay = remember { mutableStateOf("1") }
+    var selectedColor by remember { mutableStateOf(Color.Blue) }
+
+    val colorOptions = listOf(Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Magenta)
+
+    val defaultEmoji = "⭐"
+
+    var showError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(2.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Clear,
+                contentDescription = "Go to home page"
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Add a Habit"
+            )
+        }
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(
+            text = "Name",
+            modifier = Modifier.align(Alignment.Start)
+        )
+        OutlinedTextField(
+            value = habitName.value,
+            onValueChange = {
+                habitName.value = it
+                showError = false
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Black
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(
+            text = "Description"
+        )
+        OutlinedTextField(
+            value = habitDescription.value,
+            onValueChange = { habitDescription.value = it },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Black
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(
+            text = "Category"
+        )
+        OutlinedTextField(
+            value = habitCategory.value,
+            onValueChange = { habitCategory.value = it },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Black
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.padding(8.dp))
+        Text(
+            text = "Completions Per Day"
+        )
+        OutlinedTextField(
+            value = habitCompletionsPerDay.value,
+            onValueChange = { habitCompletionsPerDay.value = it },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.Black
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+/*
 @Composable
 fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
     // State for input fields
@@ -100,7 +198,7 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
                     id = 0,  // id can be auto-generated in your DB
                     name = habitName.value.trim(),
                     description = habitDescription.value.ifBlank { null },
-                    completionsPerDay = habitCompletionsPerDay.value.toIntOrNull() ?: 1,
+                    completionsPerDay = habitCompletionsPerDay.value.toIntOrNull() ?: 3,
                     category = habitCategory.value,
                     icon = defaultEmoji,
                     color = selectedColor.toArgb(),
@@ -116,3 +214,4 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
         }
     }
 }
+*/

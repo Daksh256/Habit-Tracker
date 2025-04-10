@@ -41,7 +41,6 @@ import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
 fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit) {
     val habits by viewModel.habitsList.observeAsState(emptyList())
 
-    //Test
     // State for managing the delete confirmation dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var habitToDelete by remember { mutableStateOf<Habit?>(null) }
@@ -77,11 +76,18 @@ fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit)
             items(habits) { habit ->
                 HabitItem(
                     habit = habit,
-                    onComplete = { viewModel.completeHabit(habit.id) },
-                    // Pass the lambda for long click
+                    // The checkmark button's action might need re-evaluation.
+                    // Maybe it completes ALL needed for the day? Or does nothing now?
+                    onComplete = {
+                        // Decide what the main checkmark button does now.
+                        // Option 1: Does nothing related to daily count.
+                        // Option 2: Tries to complete all remaining for today.
+                        // viewModel.completeAllForToday(habit.id) // Example: Requires new ViewModel logic
+                        println("Habit item checkmark clicked for ${habit.name}") // Placeholder
+                    },
                     onLongClick = {
-                        habitToDelete = habit // Store the habit to delete
-                        showDeleteDialog = true // Show the dialog
+                        habitToDelete = habit
+                        showDeleteDialog = true
                     },
                     viewModel = viewModel
                 )

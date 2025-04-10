@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.habittrackerfinal.presentation.viewmodel.HabitViewModel
+import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -87,10 +88,8 @@ fun HabitItem(
                 // Integrate StreakTracker directly here
                 StreakTracker(
                     viewModel = viewModel,
-                    habitId = habit.id,
-                    // Ensure color conversion is correct. Using OR might not be robust.
-                    // Consider storing color as a String or Long if Int causes issues.
-                    habitColor = Color(habit.color) // Use the habit's color for completed days
+                    habit = habit, // Pass the whole habit object
+                    habitColor = Color(habit.color)
                 )
             }
 
@@ -99,16 +98,19 @@ fun HabitItem(
 
             // Complete Button (Checkmark)
             IconButton(
-                onClick = onComplete,
-                modifier = Modifier.size(48.dp), // Make button slightly larger
+                // Update onClick to call the new ViewModel function
+                onClick = { viewModel.handleDayClick(habit.id, LocalDate.now()) },
+                //onClick = { viewModel.completeAllForToday(habit.id) },
+                modifier = Modifier.size(48.dp),
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f), // Example background
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Complete Habit",
+                    // Update content description
+                    contentDescription = "Complete all for today",
                     modifier = Modifier.size(24.dp)
                 )
             }
