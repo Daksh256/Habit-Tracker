@@ -48,23 +48,24 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
 
     var showError by remember { mutableStateOf(false) }
 
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(2.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Clear,
+            contentDescription = "Go to home page"
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "Add a Habit"
+        )
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(2.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Clear,
-                contentDescription = "Go to home page"
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "Add a Habit"
-            )
-        }
         Spacer(modifier = Modifier.padding(8.dp))
         Text(
             text = "Name",
@@ -117,6 +118,49 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
             ),
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Color Selection Row
+        Text(text = "Select Color", style = MaterialTheme.typography.bodyLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            colorOptions.forEach { color ->
+                ColorBox(color = color, isSelected = color == selectedColor) {
+                    selectedColor = color
+                }
+            }
+        }
+
+        if (showError) {
+            Text(
+                text = "Please fill in the required fields",
+                color = Color.Red
+            )
+        }
+
+        Button(onClick = {
+            // Check that required fields are not blank
+            if (habitName.value.isNotBlank() && habitCategory.value.isNotBlank()) {
+                val habit = Habit(
+                    id = 0,  // id can be auto-generated in your DB
+                    name = habitName.value.trim(),
+                    description = habitDescription.value.ifBlank { null },
+                    completionsPerDay = habitCompletionsPerDay.value.toIntOrNull() ?: 3,
+                    category = habitCategory.value,
+                    icon = defaultEmoji,
+                    color = selectedColor.toArgb(),
+                    createdDate = System.currentTimeMillis() // Using timestamp for createdDate
+                )
+                viewModel.addHabit(habit)
+                onNavigateBack()
+            } else {
+                showError = true
+            }
+        }) {
+            Text("Submit")
+        }
     }
 }
 
