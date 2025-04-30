@@ -1,6 +1,8 @@
 package com.example.habittracker.presentation.screens
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -42,7 +45,13 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
     val habitCompletionsPerDay = remember { mutableStateOf("1") }
     var selectedColor by remember { mutableStateOf(Color.Blue) }
 
-    val colorOptions = listOf(Color.Red, Color.Blue, Color.Green, Color.Yellow, Color.Magenta)
+    val colorOptions = listOf(
+        Color(0xFFE0E0E0), // light gray (no activity)
+        Color(0xFF90CAF9), // soft blue
+        Color(0xFFA5D6A7), // soft green
+        Color(0xFFFFF59D), // soft yellow
+        Color(0xFFEF9A9A)  // soft red
+    )
 
     val defaultEmoji = "⭐"
 
@@ -51,10 +60,14 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(2.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.Clear,
-            contentDescription = "Go to home page"
-        )
+        IconButton(
+            onClick = onNavigateBack
+        ) {
+            Icon(
+                imageVector = Icons.Default.Clear,
+                contentDescription = "Clear"
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = "Add a Habit"
@@ -119,7 +132,9 @@ fun AddHabitScreen(viewModel: HabitViewModel, onNavigateBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
+        Box {
 
+        }
         // Color Selection Row
         Text(text = "Select Color", style = MaterialTheme.typography.bodyLarge)
         Row(

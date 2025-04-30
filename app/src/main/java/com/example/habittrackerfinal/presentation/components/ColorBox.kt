@@ -11,12 +11,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ColorBox(color: Color, isSelected: Boolean, onClick: () -> Unit) {
+fun ColorBox(
+    color: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .size(40.dp)
             .background(color)
-            .border(2.dp, if (isSelected) Color.Black else Color.Transparent)
+            .border(
+                width = 2.dp,
+                color = if (isSelected) Color.White else Color.Transparent)
             .clickable { onClick() }
     )
 }

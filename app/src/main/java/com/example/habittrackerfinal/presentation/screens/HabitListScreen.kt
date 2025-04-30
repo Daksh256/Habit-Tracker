@@ -79,10 +79,6 @@ fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit)
                     // The checkmark button's action might need re-evaluation.
                     // Maybe it completes ALL needed for the day? Or does nothing now?
                     onComplete = {
-                        // Decide what the main checkmark button does now.
-                        // Option 1: Does nothing related to daily count.
-                        // Option 2: Tries to complete all remaining for today.
-                        // viewModel.completeAllForToday(habit.id) // Example: Requires new ViewModel logic
                         println("Habit item checkmark clicked for ${habit.name}") // Placeholder
                     },
                     onLongClick = {
@@ -128,6 +124,5 @@ fun HabitListScreen(viewModel: HabitViewModel, onNavigateToAddHabit: () -> Unit)
             }
         )
     }
-    // --- End of AlertDialog ---
 }
 
